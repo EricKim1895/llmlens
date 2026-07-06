@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://llmlens.vercel.app/sitemap.xml
+Sitemap: https://llmlens-sigma.vercel.app/sitemap.xml
