@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://llmlens.vercel.app/sitemap.xml
