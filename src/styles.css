@@ -351,6 +351,24 @@ legend {
   padding: 10px 12px;
 }
 
+.mode-callout {
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--accent-dark);
+  font-size: 14px;
+  font-weight: 700;
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.audit-form button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
 .results-panel {
   margin: 0 auto;
   max-width: 980px;

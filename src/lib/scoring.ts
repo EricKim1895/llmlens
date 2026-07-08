@@ -18,7 +18,9 @@ export const calculateMetrics = (
   const mentions = results.filter((result) => result.mentionedBrand).length
   const citations = results.filter((result) => result.citedDomain).length
   const recommendations = results.filter(
-    (result) => result.recommendationPosition !== null,
+    (result) =>
+      result.recommendationSignal ??
+      (result.recommendationPosition !== null),
   )
   const positions = recommendations
     .map((result) => result.recommendationPosition)

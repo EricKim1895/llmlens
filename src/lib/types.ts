@@ -31,8 +31,11 @@ export interface PromptResult {
   mentionedBrand: boolean
   citedDomain: boolean
   recommendationPosition: number | null
+  recommendationSignal?: boolean
   competitorsMentioned: string[]
   answerSummary: string
+  answerText?: string
+  citations?: string[]
 }
 
 export interface VisibilityMetrics {
@@ -52,4 +55,17 @@ export interface AuditResult {
   missingBrandPrompts: PromptResult[]
   competitorOnlyPrompts: PromptResult[]
   recommendations: string[]
+}
+
+export interface AnalyzePerplexityRequest {
+  input: AuditFormInput
+  prompts: GeneratedPrompt[]
+}
+
+export interface AnalyzePerplexityResponse {
+  results: PromptResult[]
+}
+
+export interface ApiErrorResponse {
+  error: string
 }

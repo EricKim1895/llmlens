@@ -1,4 +1,5 @@
 import { type FormEvent, useMemo, useState } from 'react'
+import { runPerplexityAnalyzer } from './lib/analyzerClient'
 import { generatePrompts } from './lib/promptGenerator'
 import { runMockAnalyzer } from './lib/mockAnalyzer'
 import { buildAuditResult } from './lib/scoring'
@@ -23,7 +24,11 @@ const parseCompetitors = (value: string): string[] =>
     .map((competitor) => competitor.trim())
     .filter(Boolean)
 
-const clampPromptCount = (value: number) => Math.min(20, Math.max(5, value))
+const getMaxPromptCount = (engine: SearchEngine) =>
+  engine === 'perplexity' ? 5 : 20
+
+const clampPromptCount = (value: number, engine: SearchEngine) =>
+  Math.min(getMaxPromptCount(engine), Math.max(5, value))
 
 const formatPosition = (position: number | null) =>
   position === null ? 'Not found' : `#${position}`
@@ -35,6 +40,7 @@ function App() {
   const [form, setForm] = useState<FormState>(DEFAULT_FORM)
   const [result, setResult] = useState<AuditResult | null>(null)
   const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   const competitors = useMemo(
     () => parseCompetitors(form.competitors),
@@ -48,7 +54,7 @@ function App() {
     setForm((current) => ({ ...current, [field]: value }))
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     if (!form.brandName.trim() || !form.websiteUrl.trim() || !form.industry.trim()) {
@@ -56,6 +62,7 @@ function App() {
       return
     }
 
+    const searchEngine = form.searchEngine
     const input: AuditFormInput = {
       brandName: form.brandName.trim(),
       websiteUrl: form.websiteUrl.trim(),
@@ -63,16 +70,40 @@ function App() {
       targetCountry: form.targetCountry.trim() || 'United States',
       targetLanguage: form.targetLanguage.trim() || 'English',
       competitors,
-      numberOfPrompts: clampPromptCount(form.numberOfPrompts),
-      searchEngine: 'mock',
+      numberOfPrompts: clampPromptCount(form.numberOfPrompts, searchEngine),
+      searchEngine,
     }
 
     const prompts = generatePrompts(input)
-    const promptResults = runMockAnalyzer(input, prompts)
+    const analyzedPrompts =
+      searchEngine === 'perplexity' ? prompts.slice(0, 5) : prompts
 
     setError('')
-    setResult(buildAuditResult(input, prompts, promptResults))
+    setIsLoading(true)
+
+    try {
+      const promptResults =
+        searchEngine === 'perplexity'
+          ? await runPerplexityAnalyzer({ input, prompts: analyzedPrompts })
+          : runMockAnalyzer(input, analyzedPrompts)
+
+      setResult(buildAuditResult(input, analyzedPrompts, promptResults))
+    } catch (caughtError) {
+      setResult(null)
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'The audit failed. Please try again later.',
+      )
+    } finally {
+      setIsLoading(false)
+    }
   }
+
+  const isPerplexityMode = form.searchEngine === 'perplexity'
+  const submitLabel = isPerplexityMode
+    ? 'Run Perplexity audit'
+    : 'Run mock audit'
 
   return (
     <main className="app-shell">
@@ -94,9 +125,13 @@ function App() {
           </p>
           <div className="hero-actions">
             <a href="#audit-form" className="primary-link">
-              Run mock audit
+              {submitLabel}
             </a>
-            <span className="mode-note">Mock mode only · No real API calls</span>
+            <span className="mode-note">
+              {isPerplexityMode
+                ? 'Real API mode · Uses Perplexity Sonar · Limited to 5 prompts'
+                : 'Mock mode only · No real API calls'}
+            </span>
           </div>
         </div>
       </section>
@@ -182,13 +217,16 @@ function App() {
               Number of prompts
               <input
                 min={5}
-                max={20}
+                max={getMaxPromptCount(form.searchEngine)}
                 type="number"
                 value={form.numberOfPrompts}
                 onChange={(event) =>
                   updateField(
                     'numberOfPrompts',
-                    clampPromptCount(Number(event.target.value)),
+                    clampPromptCount(
+                      Number(event.target.value),
+                      form.searchEngine,
+                    ),
                   )
                 }
               />
@@ -204,9 +242,23 @@ function App() {
                 />
                 Mock mode
               </label>
-              <label className="radio-option disabled">
-                <input disabled name="searchEngine" type="radio" />
-                Perplexity <span>Coming soon</span>
+              <label className="radio-option">
+                <input
+                  checked={form.searchEngine === 'perplexity'}
+                  name="searchEngine"
+                  onChange={() =>
+                    setForm((current) => ({
+                      ...current,
+                      searchEngine: 'perplexity',
+                      numberOfPrompts: clampPromptCount(
+                        current.numberOfPrompts,
+                        'perplexity',
+                      ),
+                    }))
+                  }
+                  type="radio"
+                />
+                Perplexity <span>Sonar</span>
               </label>
               <label className="radio-option disabled">
                 <input disabled name="searchEngine" type="radio" />
@@ -215,9 +267,17 @@ function App() {
             </fieldset>
           </div>
 
+          <p className="mode-callout">
+            {isPerplexityMode
+              ? 'Real API mode · Uses Perplexity Sonar · Limited to 5 prompts · Consumes API credits'
+              : 'Mock mode uses deterministic sample results and does not call external APIs.'}
+          </p>
+
           {error ? <p className="form-error">{error}</p> : null}
 
-          <button type="submit">Run mock audit</button>
+          <button disabled={isLoading} type="submit">
+            {isLoading ? 'Running audit...' : submitLabel}
+          </button>
         </form>
       </section>
 
@@ -226,11 +286,16 @@ function App() {
           {result ? (
             <>
               <div className="result-header">
-                <p className="eyebrow">Mock audit result</p>
+                <p className="eyebrow">
+                  {result.input.searchEngine === 'perplexity'
+                    ? 'Perplexity Sonar result'
+                    : 'Mock audit result'}
+                </p>
                 <h2>{result.input.brandName} visibility estimate</h2>
                 <p className="muted">
-                  These results are deterministic mock signals, not live AI
-                  search engine output.
+                  {result.input.searchEngine === 'perplexity'
+                    ? 'Engine: Perplexity Sonar. These results are based on live API responses, but AI answers may vary.'
+                    : 'These results are deterministic mock signals, not live AI search engine output.'}
                 </p>
               </div>
 
@@ -337,7 +402,11 @@ function App() {
                     {result.results.map((prompt) => (
                       <tr key={prompt.promptId}>
                         <td data-label="Prompt">{prompt.promptText}</td>
-                        <td data-label="Engine">Mock mode</td>
+                        <td data-label="Engine">
+                          {prompt.engine === 'perplexity'
+                            ? 'Perplexity Sonar'
+                            : 'Mock mode'}
+                        </td>
                         <td data-label="Mentioned">
                           {prompt.mentionedBrand ? 'Yes' : 'No'}
                         </td>
@@ -411,8 +480,8 @@ function App() {
           <article>
             <h3>Which engines are planned?</h3>
             <p>
-              Perplexity and Gemini are shown as coming soon. Future versions
-              should call those APIs through a backend or serverless layer.
+              Perplexity Sonar is available as a limited real API mode. Gemini
+              remains planned for a later version.
             </p>
           </article>
         </div>
@@ -421,9 +490,10 @@ function App() {
       <section className="disclaimer">
         <h2>Disclaimer</h2>
         <p>
-          Current results are generated in Mock mode and do not represent real
-          AI search engine output. Scores are estimates intended for product
-          evaluation and planning, not proof of actual AI visibility.
+          Mock results do not represent real AI search engine output. Perplexity
+          results are based on live API responses, but AI answers may vary.
+          Scores are estimates intended for product evaluation and planning,
+          not proof of actual AI visibility.
         </p>
       </section>
     </main>
