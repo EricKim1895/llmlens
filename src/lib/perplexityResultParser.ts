@@ -28,6 +28,55 @@ const includesNormalized = (text: string, query: string): boolean => {
   return Boolean(normalizedQuery) && normalizedText.includes(normalizedQuery)
 }
 
+const escapeRegExp = (value: string): string =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+const getBrandContextWindows = (
+  answerText: string,
+  brandName: string,
+): string[] => {
+  const trimmedBrand = brandName.trim()
+
+  if (!trimmedBrand) {
+    return []
+  }
+
+  const brandPattern = new RegExp(escapeRegExp(trimmedBrand), 'gi')
+  const windows: string[] = []
+  let match: RegExpExecArray | null
+
+  while ((match = brandPattern.exec(answerText)) !== null) {
+    const windowStart = Math.max(0, match.index - 160)
+    const windowEnd = Math.min(
+      answerText.length,
+      match.index + trimmedBrand.length + 160,
+    )
+    const windowText = answerText.slice(windowStart, windowEnd)
+    const brandIndexInWindow = match.index - windowStart
+    const beforeBrand = windowText.slice(0, brandIndexInWindow)
+    const afterBrand = windowText.slice(brandIndexInWindow)
+    const sentenceStart = Math.max(
+      beforeBrand.lastIndexOf('.'),
+      beforeBrand.lastIndexOf('!'),
+      beforeBrand.lastIndexOf('?'),
+      beforeBrand.lastIndexOf('\n'),
+    )
+    const sentenceEndCandidates = ['.', '!', '?', '\n']
+      .map((delimiter) => afterBrand.indexOf(delimiter))
+      .filter((index) => index >= 0)
+    const sentenceEnd =
+      sentenceEndCandidates.length > 0
+        ? Math.min(...sentenceEndCandidates)
+        : afterBrand.length
+
+    windows.push(
+      windowText.slice(sentenceStart + 1, brandIndexInWindow + sentenceEnd),
+    )
+  }
+
+  return windows
+}
+
 export const extractPerplexitySourceUrls = (
   payload: PerplexityResponsePayload,
 ): string[] => {
@@ -49,19 +98,72 @@ const hasRecommendationSignal = (
     return false
   }
 
-  const normalizedAnswer = normalizeText(answerText)
-  const signalWords = [
+  const strongSignals = [
     'recommend',
     'recommended',
     'best',
     'top',
-    'option',
-    'alternative',
-    'consider',
-    'useful',
+    'one of the best',
+    'good choice',
+    'strong option',
+    'worth considering',
+    'great choice',
+    'solid choice',
+    'leading',
+    'popular choice',
+  ]
+  const weakSignals = ['option', 'alternative', 'useful', 'consider']
+  const positiveModifiers = [
+    'good',
+    'strong',
+    'best',
+    'top',
+    'recommended',
+    'great',
+    'solid',
+    'leading',
   ]
 
-  return signalWords.some((word) => normalizedAnswer.includes(word))
+  return getBrandContextWindows(answerText, brandName).some((window) => {
+    const normalizedWindow = normalizeText(window)
+    const normalizedBrand = normalizeText(brandName)
+    const directBrandSignals = [
+      `${normalizedBrand} is recommended`,
+      `${normalizedBrand} are recommended`,
+      `${normalizedBrand} is one of the best`,
+      `${normalizedBrand} is among the best`,
+      `${normalizedBrand} is a top`,
+      `${normalizedBrand} is one of the top`,
+      `${normalizedBrand} is a good choice`,
+      `${normalizedBrand} is a great choice`,
+      `${normalizedBrand} is a solid choice`,
+      `${normalizedBrand} is a strong option`,
+      `${normalizedBrand} is worth considering`,
+      `${normalizedBrand} is a leading`,
+      `${normalizedBrand} is a popular choice`,
+      `recommend ${normalizedBrand}`,
+      `recommended ${normalizedBrand}`,
+    ]
+    const hasDirectBrandSignal = directBrandSignals.some((signal) =>
+      normalizedWindow.includes(signal),
+    )
+    const hasContrastRecommendation =
+      /\b(but|however)\b.{0,80}\b(best|top|recommended|recommend)\b/.test(
+        normalizedWindow,
+      )
+
+    if (hasContrastRecommendation && !hasDirectBrandSignal) {
+      return false
+    }
+
+    return (
+      strongSignals.some((signal) => normalizedWindow.includes(signal)) ||
+      (weakSignals.some((signal) => normalizedWindow.includes(signal)) &&
+        positiveModifiers.some((modifier) =>
+          normalizedWindow.includes(modifier),
+        ))
+    )
+  })
 }
 
 const buildAnswerSummary = (
