@@ -61,6 +61,37 @@ const formatSourceHostname = (sourceUrl: string) => {
   }
 }
 
+const buildResultExplanation = (result: AuditResult) => {
+  const { metrics } = result
+  const isPerplexity = result.input.searchEngine === 'perplexity'
+  const notes = [
+    isPerplexity
+      ? 'This score is a visibility estimate based on live Perplexity API responses. It is not an exact ranking.'
+      : 'This score is a mock visibility estimate based on deterministic sample results. It is not an exact ranking.',
+    'The score combines mention, citation, and recommendation signals from the sampled prompts.',
+  ]
+
+  if (metrics.mentionRate > 0 && metrics.citationRate === 0) {
+    notes.push(
+      'Your brand was mentioned, but the official website was not used as a source. This often means AI systems know the brand through third-party pages.',
+    )
+  }
+
+  if (metrics.score === 0) {
+    notes.push(
+      'The brand was not detected in the sampled prompts. This may be due to prompt wording, AI answer variance, or low brand visibility.',
+    )
+  }
+
+  if (metrics.citationRate > 0) {
+    notes.push(
+      'At least one source URL matched the submitted website domain.',
+    )
+  }
+
+  return notes
+}
+
 function App() {
   const [form, setForm] = useState<FormState>(DEFAULT_FORM)
   const [result, setResult] = useState<AuditResult | null>(null)
@@ -360,6 +391,43 @@ function App() {
                       result.input.searchEngine,
                     )}
                   </strong>
+                </article>
+              </div>
+
+              <div className="explanation-grid">
+                <article className="explanation-card">
+                  <h3>What this score means</h3>
+                  <ul>
+                    {buildResultExplanation(result).map((note) => (
+                      <li key={note}>{note}</li>
+                    ))}
+                  </ul>
+                </article>
+                <article className="explanation-card">
+                  <h3>Signal breakdown</h3>
+                  <dl>
+                    <div>
+                      <dt>Mention Rate</dt>
+                      <dd>
+                        Whether the AI answer text mentions your brand in the
+                        sampled prompts.
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Citation Rate</dt>
+                      <dd>
+                        Whether the returned source URLs include the submitted
+                        website domain.
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Recommendation Rate</dt>
+                      <dd>
+                        Whether the answer context appears to recommend or
+                        positively mention your brand.
+                      </dd>
+                    </div>
+                  </dl>
                 </article>
               </div>
 
