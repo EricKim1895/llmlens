@@ -50,6 +50,17 @@ const getPromptSourceUrls = (prompt: AuditResult['results'][number]) =>
 const hasRecommendationSignal = (prompt: AuditResult['results'][number]) =>
   prompt.recommendationSignal ?? (prompt.recommendationPosition !== null)
 
+const formatSourceHostname = (sourceUrl: string) => {
+  try {
+    return new URL(sourceUrl).hostname.replace(/^www\./, '')
+  } catch {
+    return sourceUrl
+      .replace(/^https?:\/\//i, '')
+      .replace(/^www\./i, '')
+      .split('/')[0]
+  }
+}
+
 function App() {
   const [form, setForm] = useState<FormState>(DEFAULT_FORM)
   const [result, setResult] = useState<AuditResult | null>(null)
@@ -417,6 +428,17 @@ function App() {
 
               <div className="table-wrap">
                 <table>
+                  <colgroup>
+                    <col className="prompt-col" />
+                    <col className="engine-col" />
+                    <col className="flag-col" />
+                    <col className="flag-col" />
+                    <col className="signal-col" />
+                    <col className="position-col" />
+                    <col className="competitors-col" />
+                    <col className="sources-col" />
+                    <col className="summary-col" />
+                  </colgroup>
                   <thead>
                     <tr>
                       <th>Prompt</th>
@@ -469,7 +491,7 @@ function App() {
                                       rel="noreferrer"
                                       target="_blank"
                                     >
-                                      {sourceUrl}
+                                      {formatSourceHostname(sourceUrl)}
                                     </a>
                                   </li>
                                 ))}

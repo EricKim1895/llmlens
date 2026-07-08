@@ -455,19 +455,41 @@ legend {
 
 table {
   border-collapse: collapse;
-  min-width: 1040px;
+  min-width: 1420px;
   table-layout: fixed;
   width: 100%;
 }
 
-th:first-child,
-td:first-child {
-  width: 24%;
+.prompt-col {
+  width: 260px;
 }
 
-th:last-child,
-td:last-child {
-  width: 28%;
+.engine-col {
+  width: 120px;
+}
+
+.flag-col {
+  width: 92px;
+}
+
+.signal-col {
+  width: 150px;
+}
+
+.position-col {
+  width: 120px;
+}
+
+.competitors-col {
+  width: 170px;
+}
+
+.sources-col {
+  width: 220px;
+}
+
+.summary-col {
+  width: 300px;
 }
 
 th,
@@ -499,7 +521,8 @@ td {
 
 .source-list a {
   color: var(--primary);
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .empty-state {
