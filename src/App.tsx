@@ -30,11 +30,19 @@ const getMaxPromptCount = (engine: SearchEngine) =>
 const clampPromptCount = (value: number, engine: SearchEngine) =>
   Math.min(getMaxPromptCount(engine), Math.max(1, value))
 
-const formatPosition = (position: number | null) =>
-  position === null ? 'Not found' : `#${position}`
+const formatPosition = (position: number | null, engine: SearchEngine) =>
+  position === null && engine === 'perplexity'
+    ? 'Not measured'
+    : position === null
+      ? 'Not found'
+      : `#${position}`
 
-const formatAveragePosition = (position: number | null) =>
-  position === null ? 'Not found' : `#${position}`
+const formatAveragePosition = (position: number | null, engine: SearchEngine) =>
+  position === null && engine === 'perplexity'
+    ? 'Not measured'
+    : position === null
+      ? 'Not found'
+      : `#${position}`
 
 function App() {
   const [form, setForm] = useState<FormState>(DEFAULT_FORM)
@@ -104,6 +112,10 @@ function App() {
   const submitLabel = isPerplexityMode
     ? 'Run Perplexity audit'
     : 'Run mock audit'
+  const formTitle = isPerplexityMode
+    ? 'Start a Perplexity audit'
+    : 'Start a mock audit'
+  const modeBadge = isPerplexityMode ? 'Real API mode' : 'Mock mode'
 
   return (
     <main className="app-shell">
@@ -111,7 +123,7 @@ function App() {
         <a className="nav-brand" href="/">
           LLM Lens
         </a>
-        <span className="nav-badge">Mock MVP</span>
+        <span className="nav-badge">{modeBadge}</span>
       </nav>
 
       <section className="hero-section">
@@ -139,11 +151,12 @@ function App() {
       <section className="form-section">
         <form id="audit-form" className="audit-form" onSubmit={handleSubmit}>
           <div>
-            <p className="eyebrow">Start a mock audit</p>
-            <h2>Start a mock audit</h2>
+            <p className="eyebrow">{formTitle}</p>
+            <h2>{formTitle}</h2>
             <p className="muted">
-              Enter your brand, website, and niche to generate deterministic
-              mock visibility signals.
+              {isPerplexityMode
+                ? 'Enter your brand, website, and niche to generate live Perplexity visibility signals.'
+                : 'Enter your brand, website, and niche to generate deterministic mock visibility signals.'}
             </p>
           </div>
 
@@ -302,7 +315,11 @@ function App() {
               <div className="score-card">
                 <span>AI Visibility Score</span>
                 <strong>{result.metrics.score}</strong>
-                <p>0-100 mock estimate</p>
+                <p>
+                  {result.input.searchEngine === 'perplexity'
+                    ? '0-100 visibility estimate'
+                    : '0-100 mock estimate'}
+                </p>
               </div>
 
               <div className="metric-grid">
@@ -321,7 +338,10 @@ function App() {
                 <article>
                   <span>Average Position</span>
                   <strong>
-                    {formatAveragePosition(result.metrics.averagePosition)}
+                    {formatAveragePosition(
+                      result.metrics.averagePosition,
+                      result.input.searchEngine,
+                    )}
                   </strong>
                 </article>
               </div>
@@ -353,7 +373,9 @@ function App() {
                   </ul>
                 ) : (
                   <p className="muted">
-                    The brand appeared in every generated mock prompt result.
+                    {result.input.searchEngine === 'perplexity'
+                      ? 'The brand appeared in every analyzed prompt result.'
+                      : 'The brand appeared in every generated mock prompt result.'}
                   </p>
                 )}
               </div>
@@ -371,7 +393,9 @@ function App() {
                   </ul>
                 ) : (
                   <p className="muted">
-                    No competitor-only prompts were found in this mock audit.
+                    {result.input.searchEngine === 'perplexity'
+                      ? 'No competitor-only prompts were found in this audit.'
+                      : 'No competitor-only prompts were found in this mock audit.'}
                   </p>
                 )}
               </div>
@@ -414,7 +438,10 @@ function App() {
                           {prompt.citedDomain ? 'Yes' : 'No'}
                         </td>
                         <td data-label="Position">
-                          {formatPosition(prompt.recommendationPosition)}
+                          {formatPosition(
+                            prompt.recommendationPosition,
+                            prompt.engine,
+                          )}
                         </td>
                         <td data-label="Competitors">
                           {prompt.competitorsMentioned.join(', ') || 'None'}
@@ -429,8 +456,8 @@ function App() {
           ) : (
             <div className="empty-state">
               <p>
-                Run a mock audit to see visibility score, mention rate,
-                citations, competitor appearances, and prompt-level findings.
+                Run an audit to see visibility score, mention rate, citations,
+                competitor appearances, and prompt-level findings.
               </p>
             </div>
           )}
@@ -445,8 +472,8 @@ function App() {
         <p>
           LLM Lens helps small teams review prompt-level visibility signals:
           brand mentions, website citations, recommendation position, and
-          competitor appearances. This MVP uses deterministic mock data so the
-          workflow can be evaluated before connecting real AI search APIs.
+          competitor appearances. Mock mode uses deterministic sample data, and
+          Perplexity mode uses live API responses for a limited real audit.
         </p>
       </section>
 
@@ -466,8 +493,8 @@ function App() {
           <article>
             <h3>Is this using real AI search data?</h3>
             <p>
-              No. This MVP uses Mock mode so the workflow and reporting can be
-              tested before live API integrations are added.
+              Mock mode uses deterministic sample data. Perplexity mode uses
+              live API responses.
             </p>
           </article>
           <article>
