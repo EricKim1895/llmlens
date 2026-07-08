@@ -9,6 +9,12 @@
 - Current indexing status: temporary `noindex, nofollow` remains enabled
 - Mock mode: available
 - Real Perplexity mode: available
+- Mock MVP: complete
+- Real Perplexity MVP: complete
+- P1 prompt generation: complete
+- P2 result explanation: complete
+- P3 citation/domain diagnostics: complete
+- Public indexing and large-scale external usage: not enabled
 
 ## 2. Completed Capabilities
 
@@ -23,6 +29,8 @@
 - Frontend does not call `api.perplexity.ai` directly
 - Result diagnostics: Mentioned, Cited, Recommendation Signal, Competitors, Sources, Summary
 - Sources display hostnames and remain clickable
+- Citation diagnostics: Expected domain, Source domains, Matched source domains
+- Matched official domains are marked in the Sources column
 
 ## 3. Key Fix History
 
@@ -31,6 +39,9 @@
 - `b583724` Refine real API mode UI copy
 - `638af04` Add Perplexity result diagnostics
 - `1e53ca5` Improve result table readability
+- `51e1875` Improve prompt generation quality
+- `c39d4c9` Improve result explanation copy
+- `e9116e7` Improve citation domain diagnostics
 
 ## 4. Real Test Results
 
@@ -68,52 +79,139 @@
 - Score: 0
 - This is reasonable because the site is new and still has `noindex, nofollow`.
 
-## 5. Important Product Findings
+## 5. P1 Prompt Generation Optimization
+
+Commit: `51e1875` Improve prompt generation quality
+
+Changes completed:
+
+- Prompts moved from broad generic questions to stronger commercial-intent AI search questions.
+- The first prompts no longer directly include the brand name, reducing artificial Mention Rate inflation.
+- Prompt generation remains deterministic and does not call external APIs.
+
+Example prompts:
+
+- `What are the best ecommerce platforms for small businesses?`
+- `Best design tool for creating marketing visuals`
+- `What are the best productivity software tools for small businesses?`
+
+### P1 Online Test Results
+
+Shopify / ecommerce platform:
+
+- 1 prompt: Score 60, Mention Rate 100%, Citation Rate 0%, Recommendation Rate 100%
+
+Canva / design tool:
+
+- 3 prompts: Score 68, Mention Rate 100%, Citation Rate 33%, Recommendation Rate 100%
+
+Notion / productivity software:
+
+- 1 prompt: Score 0
+- 3 prompts: Score 40, Mention Rate 67%, Citation Rate 0%, Recommendation Rate 67%
+
+Conclusion:
+
+- The new prompts are closer to real commercial AI search queries.
+- A 1-prompt run behaves like a single AI search snapshot and can vary significantly.
+- A 3-prompt run behaves more like a small-sample visibility audit and gives a more stable signal.
+
+## 6. P2 Result Explanation Optimization
+
+Commit: `c39d4c9` Improve result explanation copy
+
+Changes completed:
+
+- Added `What this score means`.
+- Added `Signal breakdown`.
+- Clarified that Score is a visibility estimate, not an exact ranking.
+- Explained Mention, Citation, and Recommendation as separate signals.
+- When Mention Rate is greater than 0 and Citation Rate is 0, the UI explains that the brand was mentioned but the official website was not cited.
+- When Score is 0, the UI explains that the brand was not detected in sampled prompts.
+
+### P2 Online Validation
+
+Canva / design tool:
+
+- Citation Rate: 33%
+- The explanation area correctly showed that at least one source URL matched the submitted website domain.
+
+Notion / productivity software:
+
+- Score: 0
+- The explanation area correctly showed that the sampled prompts did not detect the brand.
+
+## 7. P3 Citation / Domain Diagnostics Optimization
+
+Commit: `e9116e7` Improve citation domain diagnostics
+
+Changes completed:
+
+- Added Expected domain.
+- Added Source domains.
+- Added Matched source domains.
+- Sources that match the submitted official website domain show a check mark in the Sources column.
+
+Domain matching rules:
+
+- `www` and non-`www` are normalized.
+- `http` and `https` do not affect matching.
+- URL path, query, and hash do not affect matching.
+- `help.shopify.com` can match `shopify.com`.
+- `blog.canva.com` can match `canva.com`.
+- No public suffix dependency is used.
+
+### P3 Online Validation
+
+Canva / design tool:
+
+- Expected domain: `canva.com`
+- Matched source domains: `canva.com`
+- Citation Rate: 33%
+- This shows that at least one returned source URL matched the official website domain.
+
+Notion / productivity software:
+
+- Expected domain: `notion.com`
+- Matched source domains: None
+- Citation Rate: 0%
+- This shows that no returned source URL matched the official website domain.
+
+## 8. Important Product Findings
 
 - AI answer mentions your brand does not mean it cites your official website.
 - Mention, Recommendation, and Citation are separate visibility signals.
 - Citation Rate 0 is not necessarily a bug. It may mean the AI answer used third-party sources instead of the official website.
 - This separation can become one of LLM Lens's core value points: showing not only whether a brand appears, but whether the official site is used as a source.
 
-## 6. Known Issues
+## 9. Known Issues
 
-- Prompt generation is still broad in some cases, for example `What is the best design tool?`
 - A single prompt can produce volatile results.
 - Recommendation Signal may be too broad.
-- Citation detection currently checks whether source URLs match the submitted official domain.
+- Citation detection currently uses lightweight hostname matching without a public suffix library.
 - The result table is still wide, but acceptable for the current diagnostic version.
 - Login, database, saved reports, and paywall are not implemented.
 - `noindex, nofollow` remains enabled, so the site is not intended for public search indexing yet.
 
-## 7. Next Priorities
+## 10. Next Priorities
 
-### P1: Improve prompt generation
-
-- Move from broad generic questions to stronger commercial-intent prompts.
-- Example prompt types:
-  - `best X for small business`
-  - `X alternatives`
-  - `tools for Y use case`
-
-### P2: Improve result explanation
-
-- Explain more clearly why a score is 60 or 0.
-- Separately explain Mentioned, Cited, and Recommended signals.
-
-### P3: Improve citation and domain matching
-
-- Handle `www` and non-`www` consistently.
-- Handle subdomains clearly.
-- Show matched domain and expected domain in the diagnostics.
-
-### P4: Run small-sample testing across 10-20 brands
+### P4: Small-sample validation across 10-20 brands
 
 - Large brands
 - Small brands
 - User-owned projects
 - Different industries
+- Record differences between 1-prompt and 3-prompt runs
+- Observe whether Mention, Citation, and Recommendation signals look reasonable
 
-## 8. Not Now
+### P5: Decision point
+
+- Decide whether to continue product optimization.
+- Decide whether the product is ready to remove `noindex, nofollow`.
+- Decide whether to build a landing page or public beta.
+- Decide whether to add saved reports, export, login, or related SaaS features.
+
+## 11. Not Now
 
 - Do not remove `noindex, nofollow`.
 - Do not add login.
@@ -124,7 +222,7 @@
 - Do not make a major UI redesign.
 - Do not open the tool for large-scale external usage yet.
 
-## 9. Run Checks
+## 12. Run Checks
 
 Run before committing future changes:
 
