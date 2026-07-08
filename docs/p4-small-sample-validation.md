@@ -59,18 +59,18 @@ Record:
 
 | Group | Brand | Prompt count | Score | Mention Rate | Citation Rate | Recommendation Rate | Average Position | Expected domain | Matched source domains | Sources include official site? | Matches intuition? | Notes |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | --- | --- | --- | --- |
-| Large brand | Shopify | 1 |  |  |  |  |  |  |  |  |  |  |
-| Large brand | Shopify | 3 |  |  |  |  |  |  |  |  |  |  |
-| Large brand | Canva | 1 |  |  |  |  |  |  |  |  |  |  |
-| Large brand | Canva | 3 |  |  |  |  |  |  |  |  |  |  |
-| Large brand | Notion | 1 |  |  |  |  |  |  |  |  |  |  |
-| Large brand | Notion | 3 |  |  |  |  |  |  |  |  |  |  |
+| Large brand | Shopify | 1 | 60 | 100% | 0% | 100% | Not measured | shopify.com | None | No | Yes | Mentioned and recommended, but sources were third-party domains. |
+| Large brand | Shopify | 3 | 60 | 100% | 0% | 100% | Not measured | shopify.com | None | No | Yes | Stable mention/recommendation signal; no official-site citation. |
+| Large brand | Canva | 1 | 60 | 100% | 0% | 100% | Not measured | canva.com | None | No | Yes | Mentioned and recommended, but first prompt used third-party sources. |
+| Large brand | Canva | 3 | 68 | 100% | 33% | 100% | Not measured | canva.com | canva.com | Yes | Yes | One sampled answer cited the official domain. |
+| Large brand | Notion | 1 | 0 | 0% | 0% | 0% | Not measured | notion.com | None | No | Mostly | First generic productivity prompt mentioned competitors but not Notion. |
+| Large brand | Notion | 3 | 40 | 67% | 0% | 67% | Not measured | notion.com | None | No | Yes | Broader sample detected Notion in later prompts, but no official citation. |
 | Large brand | Grammarly | 1 |  |  |  |  |  |  |  |  |  |  |
 | Large brand | Grammarly | 3 |  |  |  |  |  |  |  |  |  |  |
 | Large brand | Mailchimp | 1 |  |  |  |  |  |  |  |  |  |  |
 | Large brand | Mailchimp | 3 |  |  |  |  |  |  |  |  |  |  |
-| Small/mid brand | Beehiiv | 1 |  |  |  |  |  |  |  |  |  |  |
-| Small/mid brand | Beehiiv | 3 |  |  |  |  |  |  |  |  |  |  |
+| Small/mid brand | Beehiiv | 1 | 60 | 100% | 0% | 100% | Not measured | beehiiv.com | None | No | Yes | Mentioned and recommended in the first prompt; no official citation. |
+| Small/mid brand | Beehiiv | 3 | 28 | 33% | 33% | 33% | Not measured | beehiiv.com | beehiiv.com | Yes | Yes | Wider sample lowered visibility but found one official-domain citation. |
 | Small/mid brand | Tally | 1 |  |  |  |  |  |  |  |  |  |  |
 | Small/mid brand | Tally | 3 |  |  |  |  |  |  |  |  |  |  |
 | Small/mid brand | Plausible | 1 |  |  |  |  |  |  |  |  |  |  |
@@ -79,8 +79,8 @@ Record:
 | Small/mid brand | Framer | 3 |  |  |  |  |  |  |  |  |  |  |
 | Small/mid brand | Linear | 1 |  |  |  |  |  |  |  |  |  |  |
 | Small/mid brand | Linear | 3 |  |  |  |  |  |  |  |  |  |  |
-| User project | LLMLens | 1 |  |  |  |  |  |  |  |  |  |  |
-| User project | LLMLens | 3 |  |  |  |  |  |  |  |  |  |  |
+| User project | LLMLens | 1 | 0 | 0% | 0% | 0% | Not measured | llmlens-sigma.vercel.app | None | No | Yes | New noindex site was not detected; competitors appeared instead. |
+| User project | LLMLens | 3 | 0 | 0% | 0% | 0% | Not measured | llmlens-sigma.vercel.app | None | No | Yes | Expected for a new noindex project; no official-domain citation. |
 | User project | Ecommerce Calculators | 1 |  |  |  |  |  |  |  |  |  |  |
 | User project | Ecommerce Calculators | 3 |  |  |  |  |  |  |  |  |  |  |
 | User project | ClearWord Lab | 1 |  |  |  |  |  |  |  |  |  |  |
