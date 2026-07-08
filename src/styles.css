@@ -194,6 +194,17 @@ a {
   color: var(--accent-dark);
 }
 
+.prompt-help {
+  display: grid;
+  gap: 6px;
+  line-height: 1.45;
+}
+
+.prompt-help strong {
+  color: var(--accent-dark);
+  font-size: 12px;
+}
+
 .section {
   display: grid;
   gap: 28px;
