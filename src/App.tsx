@@ -28,7 +28,7 @@ const getMaxPromptCount = (engine: SearchEngine) =>
   engine === 'perplexity' ? 5 : 20
 
 const clampPromptCount = (value: number, engine: SearchEngine) =>
-  Math.min(getMaxPromptCount(engine), Math.max(5, value))
+  Math.min(getMaxPromptCount(engine), Math.max(1, value))
 
 const formatPosition = (position: number | null) =>
   position === null ? 'Not found' : `#${position}`
@@ -216,7 +216,7 @@ function App() {
             <label>
               Number of prompts
               <input
-                min={5}
+                min={1}
                 max={getMaxPromptCount(form.searchEngine)}
                 type="number"
                 value={form.numberOfPrompts}

@@ -1,6 +1,6 @@
 import type { AuditFormInput, GeneratedPrompt, PromptIntent } from './types'
 
-const clampPromptCount = (count: number) => Math.min(20, Math.max(5, count))
+const clampPromptCount = (count: number) => Math.min(20, Math.max(1, count))
 
 const cleanText = (value: string) => value.trim().replace(/\s+/g, ' ')
 
