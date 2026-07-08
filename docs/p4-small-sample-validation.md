@@ -65,26 +65,26 @@ Record:
 | Large brand | Canva | 3 | 68 | 100% | 33% | 100% | Not measured | canva.com | canva.com | Yes | Yes | One sampled answer cited the official domain. |
 | Large brand | Notion | 1 | 0 | 0% | 0% | 0% | Not measured | notion.com | None | No | Mostly | First generic productivity prompt mentioned competitors but not Notion. |
 | Large brand | Notion | 3 | 40 | 67% | 0% | 67% | Not measured | notion.com | None | No | Yes | Broader sample detected Notion in later prompts, but no official citation. |
-| Large brand | Grammarly | 1 |  |  |  |  |  |  |  |  |  |  |
-| Large brand | Grammarly | 3 |  |  |  |  |  |  |  |  |  |  |
-| Large brand | Mailchimp | 1 |  |  |  |  |  |  |  |  |  |  |
-| Large brand | Mailchimp | 3 |  |  |  |  |  |  |  |  |  |  |
+| Large brand | Grammarly | 1 | 60 | 100% | 0% | 100% | Not measured | grammarly.com | None | No | Yes | Mentioned and recommended, but sources were third-party domains. |
+| Large brand | Grammarly | 3 | 40 | 67% | 0% | 67% | Not measured | grammarly.com | None | No | Yes | Wider sample lowered visibility; no official-domain citation. |
+| Large brand | Mailchimp | 1 | 85 | 100% | 100% | 100% | Not measured | mailchimp.com | mailchimp.com | Yes | Yes | Strong result; official domain matched in the single prompt. |
+| Large brand | Mailchimp | 3 | 68 | 100% | 33% | 100% | Not measured | mailchimp.com | mailchimp.com | Yes | Yes | Stable mention signal with one official-domain citation. |
 | Small/mid brand | Beehiiv | 1 | 60 | 100% | 0% | 100% | Not measured | beehiiv.com | None | No | Yes | Mentioned and recommended in the first prompt; no official citation. |
 | Small/mid brand | Beehiiv | 3 | 28 | 33% | 33% | 33% | Not measured | beehiiv.com | beehiiv.com | Yes | Yes | Wider sample lowered visibility but found one official-domain citation. |
-| Small/mid brand | Tally | 1 |  |  |  |  |  |  |  |  |  |  |
-| Small/mid brand | Tally | 3 |  |  |  |  |  |  |  |  |  |  |
-| Small/mid brand | Plausible | 1 |  |  |  |  |  |  |  |  |  |  |
-| Small/mid brand | Plausible | 3 |  |  |  |  |  |  |  |  |  |  |
-| Small/mid brand | Framer | 1 |  |  |  |  |  |  |  |  |  |  |
-| Small/mid brand | Framer | 3 |  |  |  |  |  |  |  |  |  |  |
-| Small/mid brand | Linear | 1 |  |  |  |  |  |  |  |  |  |  |
-| Small/mid brand | Linear | 3 |  |  |  |  |  |  |  |  |  |  |
+| Small/mid brand | Tally | 1 | 60 | 100% | 0% | 100% | Not measured | tally.so | None | No | Yes | Mentioned and recommended, but no official-domain citation. |
+| Small/mid brand | Tally | 3 | 40 | 67% | 0% | 67% | Not measured | tally.so | None | No | Yes | Broader sample reduced visibility; sources stayed third-party. |
+| Small/mid brand | Plausible | 1 | 0 | 0% | 0% | 0% | Not measured | plausible.io | None | No | Yes | Generic web analytics prompt favored competitors and did not mention Plausible. |
+| Small/mid brand | Plausible | 3 | 0 | 0% | 0% | 0% | Not measured | plausible.io | None | No | Yes | No sampled prompt detected Plausible; no official-domain citation. |
+| Small/mid brand | Framer | 1 | 0 | 0% | 0% | 0% | Not measured | framer.com | None | No | Mostly | Generic website builder prompt mentioned stronger mainstream competitors. |
+| Small/mid brand | Framer | 3 | 0 | 0% | 0% | 0% | Not measured | framer.com | None | No | Mostly | Framer was not detected in this small sample. |
+| Small/mid brand | Linear | 1 | 0 | 0% | 0% | 0% | Not measured | linear.app | None | No | Mostly | Generic project management prompt favored Jira, Asana, and ClickUp. |
+| Small/mid brand | Linear | 3 | 0 | 0% | 0% | 0% | Not measured | linear.app | None | No | Mostly | Linear was not detected in this small sample. |
 | User project | LLMLens | 1 | 0 | 0% | 0% | 0% | Not measured | llmlens-sigma.vercel.app | None | No | Yes | New noindex site was not detected; competitors appeared instead. |
 | User project | LLMLens | 3 | 0 | 0% | 0% | 0% | Not measured | llmlens-sigma.vercel.app | None | No | Yes | Expected for a new noindex project; no official-domain citation. |
-| User project | Ecommerce Calculators | 1 |  |  |  |  |  |  |  |  |  |  |
-| User project | Ecommerce Calculators | 3 |  |  |  |  |  |  |  |  |  |  |
-| User project | ClearWord Lab | 1 |  |  |  |  |  |  |  |  |  |  |
-| User project | ClearWord Lab | 3 |  |  |  |  |  |  |  |  |  |  |
+| User project | Ecommerce Calculators | 1 | 60 | 100% | 0% | 100% | Not measured | ecommerce-calculators-eta.vercel.app | None | No | Mixed | Brand phrase was detected, but sources did not cite the submitted site. |
+| User project | Ecommerce Calculators | 3 | 20 | 33% | 0% | 33% | Not measured | ecommerce-calculators-eta.vercel.app | None | No | Mixed | Wider sample mostly mentioned generic calculator competitors. |
+| User project | ClearWord Lab | 1 | 0 | 0% | 0% | 0% | Not measured | clearwordlab.com | None | No | Yes | New/small project was not detected; Grammarly appeared as a competitor. |
+| User project | ClearWord Lab | 3 | 0 | 0% | 0% | 0% | Not measured | clearwordlab.com | None | No | Yes | No sampled prompt detected ClearWord Lab or cited the official domain. |
 
 ## 5. Initial Evaluation Criteria
 
