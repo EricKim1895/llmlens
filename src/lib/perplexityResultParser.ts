@@ -127,5 +127,6 @@ export const parsePerplexityPromptResult = ({
     ),
     answerText,
     citations: sourceUrls,
+    sourceUrls,
   }
 }

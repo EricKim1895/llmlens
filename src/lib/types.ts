@@ -36,6 +36,7 @@ export interface PromptResult {
   answerSummary: string
   answerText?: string
   citations?: string[]
+  sourceUrls: string[]
 }
 
 export interface VisibilityMetrics {

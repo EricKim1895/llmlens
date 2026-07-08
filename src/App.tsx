@@ -44,6 +44,12 @@ const formatAveragePosition = (position: number | null, engine: SearchEngine) =>
       ? 'Not found'
       : `#${position}`
 
+const getPromptSourceUrls = (prompt: AuditResult['results'][number]) =>
+  prompt.sourceUrls.length > 0 ? prompt.sourceUrls : (prompt.citations ?? [])
+
+const hasRecommendationSignal = (prompt: AuditResult['results'][number]) =>
+  prompt.recommendationSignal ?? (prompt.recommendationPosition !== null)
+
 function App() {
   const [form, setForm] = useState<FormState>(DEFAULT_FORM)
   const [result, setResult] = useState<AuditResult | null>(null)
@@ -417,8 +423,10 @@ function App() {
                       <th>Engine</th>
                       <th>Mentioned</th>
                       <th>Cited</th>
+                      <th>Recommendation Signal</th>
                       <th>Position</th>
                       <th>Competitors</th>
+                      <th>Sources</th>
                       <th>Summary</th>
                     </tr>
                   </thead>
@@ -437,6 +445,9 @@ function App() {
                         <td data-label="Cited">
                           {prompt.citedDomain ? 'Yes' : 'No'}
                         </td>
+                        <td data-label="Recommendation Signal">
+                          {hasRecommendationSignal(prompt) ? 'Yes' : 'No'}
+                        </td>
                         <td data-label="Position">
                           {formatPosition(
                             prompt.recommendationPosition,
@@ -445,6 +456,27 @@ function App() {
                         </td>
                         <td data-label="Competitors">
                           {prompt.competitorsMentioned.join(', ') || 'None'}
+                        </td>
+                        <td data-label="Sources">
+                          {getPromptSourceUrls(prompt).length > 0 ? (
+                            <ul className="source-list">
+                              {getPromptSourceUrls(prompt)
+                                .slice(0, 3)
+                                .map((sourceUrl) => (
+                                  <li key={sourceUrl}>
+                                    <a
+                                      href={sourceUrl}
+                                      rel="noreferrer"
+                                      target="_blank"
+                                    >
+                                      {sourceUrl}
+                                    </a>
+                                  </li>
+                                ))}
+                            </ul>
+                          ) : (
+                            'None'
+                          )}
                         </td>
                         <td data-label="Summary">{prompt.answerSummary}</td>
                       </tr>

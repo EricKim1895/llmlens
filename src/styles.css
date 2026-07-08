@@ -455,7 +455,7 @@ legend {
 
 table {
   border-collapse: collapse;
-  min-width: 780px;
+  min-width: 1040px;
   table-layout: fixed;
   width: 100%;
 }
@@ -486,6 +486,19 @@ th {
 td {
   color: var(--muted);
   font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.source-list {
+  display: grid;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.source-list a {
+  color: var(--primary);
   overflow-wrap: anywhere;
 }
 

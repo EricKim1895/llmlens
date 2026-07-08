@@ -127,6 +127,7 @@ export const runMockAnalyzer = (
         citedDomain,
         competitorsMentioned,
       ),
+      sourceUrls: [],
     }
   })
 }
