@@ -289,13 +289,6 @@ function App() {
                   updateField('targetLanguage', event.target.value)
                 }
               />
-              <span className="help-text prompt-help">
-                1 prompt = quick snapshot. 3 prompts = recommended mini audit.
-                More prompts may use more API credits.
-                {isPerplexityMode ? (
-                  <strong>Recommended: 3 prompts</strong>
-                ) : null}
-              </span>
             </label>
           </div>
 
@@ -330,6 +323,13 @@ function App() {
                   )
                 }
               />
+              <span className="help-text prompt-help">
+                1 prompt = quick snapshot. 3 prompts = recommended mini audit.
+                More prompts may use more API credits.
+                {isPerplexityMode ? (
+                  <strong>Recommended: 3 prompts</strong>
+                ) : null}
+              </span>
             </label>
             <fieldset>
               <legend>Search engine</legend>
