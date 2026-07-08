@@ -47,6 +47,11 @@ const formatAveragePosition = (position: number | null, engine: SearchEngine) =>
 const getPromptSourceUrls = (prompt: AuditResult['results'][number]) =>
   prompt.sourceUrls.length > 0 ? prompt.sourceUrls : (prompt.citations ?? [])
 
+const getPromptSourceDomains = (prompt: AuditResult['results'][number]) =>
+  prompt.sourceDomains.length > 0
+    ? prompt.sourceDomains
+    : getPromptSourceUrls(prompt).map(formatSourceHostname)
+
 const hasRecommendationSignal = (prompt: AuditResult['results'][number]) =>
   prompt.recommendationSignal ?? (prompt.recommendationPosition !== null)
 
@@ -61,9 +66,32 @@ const formatSourceHostname = (sourceUrl: string) => {
   }
 }
 
+const getResultExpectedDomain = (result: AuditResult) =>
+  result.results.find((prompt) => prompt.expectedDomain)?.expectedDomain ??
+  formatSourceHostname(result.input.websiteUrl)
+
+const getResultSourceDomains = (result: AuditResult) =>
+  Array.from(
+    new Set(result.results.flatMap((prompt) => getPromptSourceDomains(prompt))),
+  )
+
+const getResultMatchedDomains = (result: AuditResult) =>
+  Array.from(
+    new Set(
+      result.results.flatMap((prompt) => prompt.matchedSourceDomains),
+    ),
+  )
+
+const sourceDomainMatchesPrompt = (
+  sourceUrl: string,
+  prompt: AuditResult['results'][number],
+) => prompt.matchedSourceDomains.includes(formatSourceHostname(sourceUrl))
+
 const buildResultExplanation = (result: AuditResult) => {
   const { metrics } = result
   const isPerplexity = result.input.searchEngine === 'perplexity'
+  const expectedDomain = getResultExpectedDomain(result)
+  const matchedDomains = getResultMatchedDomains(result)
   const notes = [
     isPerplexity
       ? 'This score is a visibility estimate based on live Perplexity API responses. It is not an exact ranking.'
@@ -85,7 +113,11 @@ const buildResultExplanation = (result: AuditResult) => {
 
   if (metrics.citationRate > 0) {
     notes.push(
-      'At least one source URL matched the submitted website domain.',
+      `At least one returned source URL matched the submitted domain. Matched domains: ${matchedDomains.join(', ')}.`,
+    )
+  } else {
+    notes.push(
+      `Expected domain: ${expectedDomain}. No returned source URL matched this domain.`,
     )
   }
 
@@ -431,6 +463,32 @@ function App() {
                 </article>
               </div>
 
+              <div className="domain-diagnostics">
+                <h3>Citation domain diagnostics</h3>
+                <dl>
+                  <div>
+                    <dt>Expected domain</dt>
+                    <dd>{getResultExpectedDomain(result)}</dd>
+                  </div>
+                  <div>
+                    <dt>Source domains</dt>
+                    <dd>
+                      {getResultSourceDomains(result).length > 0
+                        ? getResultSourceDomains(result).join(', ')
+                        : 'None'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Matched source domains</dt>
+                    <dd>
+                      {getResultMatchedDomains(result).length > 0
+                        ? getResultMatchedDomains(result).join(', ')
+                        : 'None'}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+
               <div className="insight-section">
                 <h3>Competitor appearance counts</h3>
                 {Object.keys(result.metrics.competitorShare).length > 0 ? (
@@ -560,6 +618,15 @@ function App() {
                                       target="_blank"
                                     >
                                       {formatSourceHostname(sourceUrl)}
+                                      {sourceDomainMatchesPrompt(
+                                        sourceUrl,
+                                        prompt,
+                                      ) ? (
+                                        <span className="source-match">
+                                          {' '}
+                                          ✓
+                                        </span>
+                                      ) : null}
                                     </a>
                                   </li>
                                 ))}

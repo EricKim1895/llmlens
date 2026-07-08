@@ -1,4 +1,8 @@
-import { hostnamesMatch } from './domain'
+import {
+  getMatchedSourceDomains,
+  getSourceDomains,
+  normalizeHostname,
+} from './domain'
 import type { AuditFormInput, GeneratedPrompt, PromptResult } from './types'
 
 export interface PerplexitySearchResult {
@@ -98,9 +102,13 @@ export const parsePerplexityPromptResult = ({
   sourceUrls: string[]
 }): PromptResult => {
   const mentionedBrand = includesNormalized(answerText, input.brandName)
-  const citedDomain = sourceUrls.some((sourceUrl) =>
-    hostnamesMatch(sourceUrl, input.websiteUrl),
+  const expectedDomain = normalizeHostname(input.websiteUrl)
+  const sourceDomains = getSourceDomains(sourceUrls)
+  const matchedSourceDomains = getMatchedSourceDomains(
+    sourceUrls,
+    input.websiteUrl,
   )
+  const citedDomain = matchedSourceDomains.length > 0
   const competitorsMentioned = input.competitors.filter((competitor) =>
     includesNormalized(answerText, competitor),
   )
@@ -128,5 +136,8 @@ export const parsePerplexityPromptResult = ({
     answerText,
     citations: sourceUrls,
     sourceUrls,
+    expectedDomain,
+    sourceDomains,
+    matchedSourceDomains,
   }
 }

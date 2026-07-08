@@ -37,6 +37,9 @@ export interface PromptResult {
   answerText?: string
   citations?: string[]
   sourceUrls: string[]
+  expectedDomain: string
+  sourceDomains: string[]
+  matchedSourceDomains: string[]
 }
 
 export interface VisibilityMetrics {

@@ -467,6 +467,37 @@ legend {
   margin: 0;
 }
 
+.domain-diagnostics {
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 24px;
+  padding: 18px;
+}
+
+.domain-diagnostics h3 {
+  margin-top: 0;
+}
+
+.domain-diagnostics dl {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+}
+
+.domain-diagnostics dt {
+  color: var(--strong);
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.domain-diagnostics dd {
+  color: var(--muted);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
 .insight-section {
   border-top: 1px solid var(--border);
   padding: 20px 0;
@@ -570,6 +601,11 @@ td {
   word-break: normal;
 }
 
+.source-match {
+  color: var(--accent-dark);
+  font-weight: 900;
+}
+
 .empty-state {
   display: grid;
   gap: 10px;
@@ -645,6 +681,10 @@ td {
   .explanation-grid {
     grid-template-columns: 1fr;
   }
+
+  .domain-diagnostics dl {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 640px) {
@@ -682,6 +722,7 @@ td {
 
   .field-row,
   .explanation-grid,
+  .domain-diagnostics dl,
   .metric-grid,
   .faq-grid {
     grid-template-columns: 1fr;

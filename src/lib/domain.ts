@@ -15,7 +15,8 @@ export const normalizeHostname = (value: string): string => {
     return trimmed
       .replace(/^https?:\/\//i, '')
       .replace(/^www\./i, '')
-      .split('/')[0]
+      .split(/[/?#]/)[0]
+      .replace(/:\d+$/, '')
       .toLowerCase()
   }
 }
@@ -30,3 +31,20 @@ export const hostnamesMatch = (sourceUrl: string, targetUrl: string): boolean =>
 
   return source === target || source.endsWith(`.${target}`)
 }
+
+export const getSourceDomains = (sourceUrls: string[]): string[] =>
+  Array.from(
+    new Set(
+      sourceUrls
+        .map((sourceUrl) => normalizeHostname(sourceUrl))
+        .filter(Boolean),
+    ),
+  )
+
+export const getMatchedSourceDomains = (
+  sourceUrls: string[],
+  targetUrl: string,
+): string[] =>
+  getSourceDomains(sourceUrls).filter((sourceDomain) =>
+    hostnamesMatch(sourceDomain, targetUrl),
+  )

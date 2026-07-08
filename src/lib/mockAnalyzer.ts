@@ -128,6 +128,9 @@ export const runMockAnalyzer = (
         competitorsMentioned,
       ),
       sourceUrls: [],
+      expectedDomain: domain,
+      sourceDomains: [],
+      matchedSourceDomains: [],
     }
   })
 }

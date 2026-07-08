@@ -61,7 +61,8 @@ const normalizeHostname = (value: string): string => {
     return trimmed
       .replace(/^https?:\/\//i, '')
       .replace(/^www\./i, '')
-      .split('/')[0]
+      .split(/[/?#]/)[0]
+      .replace(/:\d+$/, '')
       .toLowerCase()
   }
 }
@@ -76,6 +77,23 @@ const hostnamesMatch = (sourceUrl: string, targetUrl: string): boolean => {
 
   return source === target || source.endsWith(`.${target}`)
 }
+
+const getSourceDomains = (sourceUrls: string[]): string[] =>
+  Array.from(
+    new Set(
+      sourceUrls
+        .map((sourceUrl) => normalizeHostname(sourceUrl))
+        .filter(Boolean),
+    ),
+  )
+
+const getMatchedSourceDomains = (
+  sourceUrls: string[],
+  targetUrl: string,
+): string[] =>
+  getSourceDomains(sourceUrls).filter((sourceDomain) =>
+    hostnamesMatch(sourceDomain, targetUrl),
+  )
 
 const normalizeText = (value: string): string =>
   value
@@ -165,9 +183,13 @@ const parsePerplexityPromptResult = ({
   sourceUrls: string[]
 }): PromptResult => {
   const mentionedBrand = includesNormalized(answerText, input.brandName)
-  const citedDomain = sourceUrls.some((sourceUrl) =>
-    hostnamesMatch(sourceUrl, input.websiteUrl),
+  const expectedDomain = normalizeHostname(input.websiteUrl)
+  const sourceDomains = getSourceDomains(sourceUrls)
+  const matchedSourceDomains = getMatchedSourceDomains(
+    sourceUrls,
+    input.websiteUrl,
   )
+  const citedDomain = matchedSourceDomains.length > 0
   const competitorsMentioned = input.competitors.filter((competitor) =>
     includesNormalized(answerText, competitor),
   )
@@ -195,6 +217,9 @@ const parsePerplexityPromptResult = ({
     answerText,
     citations: sourceUrls,
     sourceUrls,
+    expectedDomain,
+    sourceDomains,
+    matchedSourceDomains,
   }
 }
 
