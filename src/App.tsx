@@ -1,5 +1,11 @@
 import { type FormEvent, useMemo, useState } from 'react'
 import { runPerplexityAnalyzer } from './lib/analyzerClient'
+import {
+  buildAuditJson,
+  buildAuditMarkdown,
+  buildAuditSummaryText,
+  buildExportFilename,
+} from './lib/exportResult'
 import { generatePrompts } from './lib/promptGenerator'
 import { runMockAnalyzer } from './lib/mockAnalyzer'
 import { buildAuditResult } from './lib/scoring'
@@ -87,6 +93,23 @@ const sourceDomainMatchesPrompt = (
   prompt: AuditResult['results'][number],
 ) => prompt.matchedSourceDomains.includes(formatSourceHostname(sourceUrl))
 
+const downloadTextFile = (
+  filename: string,
+  content: string,
+  mimeType: string,
+) => {
+  const blob = new Blob([content], { type: mimeType })
+  const downloadUrl = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+
+  link.href = downloadUrl
+  link.download = filename
+  document.body.append(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(downloadUrl)
+}
+
 const buildResultExplanation = (result: AuditResult) => {
   const { metrics } = result
   const isPerplexity = result.input.searchEngine === 'perplexity'
@@ -128,6 +151,7 @@ function App() {
   const [form, setForm] = useState<FormState>(DEFAULT_FORM)
   const [result, setResult] = useState<AuditResult | null>(null)
   const [error, setError] = useState('')
+  const [exportMessage, setExportMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
   const competitors = useMemo(
@@ -167,6 +191,7 @@ function App() {
       searchEngine === 'perplexity' ? prompts.slice(0, 5) : prompts
 
     setError('')
+    setExportMessage('')
     setIsLoading(true)
 
     try {
@@ -178,6 +203,7 @@ function App() {
       setResult(buildAuditResult(input, analyzedPrompts, promptResults))
     } catch (caughtError) {
       setResult(null)
+      setExportMessage('')
       setError(
         caughtError instanceof Error
           ? caughtError.message
@@ -196,6 +222,33 @@ function App() {
     ? 'Start a Perplexity audit'
     : 'Start a mock audit'
   const modeBadge = isPerplexityMode ? 'Real API mode' : 'Mock mode'
+
+  const handleCopySummary = async (auditResult: AuditResult) => {
+    try {
+      await navigator.clipboard.writeText(buildAuditSummaryText(auditResult))
+      setExportMessage('Summary copied.')
+    } catch {
+      setExportMessage('Copy failed. You can still download the report.')
+    }
+  }
+
+  const handleDownloadMarkdown = (auditResult: AuditResult) => {
+    downloadTextFile(
+      buildExportFilename(auditResult, 'md'),
+      buildAuditMarkdown(auditResult),
+      'text/markdown;charset=utf-8',
+    )
+    setExportMessage('Markdown report downloaded.')
+  }
+
+  const handleDownloadJson = (auditResult: AuditResult) => {
+    downloadTextFile(
+      buildExportFilename(auditResult, 'json'),
+      buildAuditJson(auditResult),
+      'application/json;charset=utf-8',
+    )
+    setExportMessage('JSON report downloaded.')
+  }
 
   return (
     <main className="app-shell">
@@ -397,6 +450,29 @@ function App() {
                     ? 'Engine: Perplexity Sonar. These results are based on live API responses, but AI answers may vary.'
                     : 'These results are deterministic mock signals, not live AI search engine output.'}
                 </p>
+                <div className="export-actions" aria-label="Export audit result">
+                  <button
+                    onClick={() => void handleCopySummary(result)}
+                    type="button"
+                  >
+                    Copy summary
+                  </button>
+                  <button
+                    onClick={() => handleDownloadMarkdown(result)}
+                    type="button"
+                  >
+                    Download Markdown
+                  </button>
+                  <button
+                    onClick={() => handleDownloadJson(result)}
+                    type="button"
+                  >
+                    Download JSON
+                  </button>
+                </div>
+                {exportMessage ? (
+                  <p className="export-message">{exportMessage}</p>
+                ) : null}
               </div>
 
               <div className="score-card">
