@@ -17,6 +17,7 @@
 - P5-1 three-prompt mini audit guidance: complete
 - P5-2 recommendation signal tightening: complete
 - P5-3 audit result export: complete
+- P5-4 product copy polish: complete
 - Public indexing and large-scale external usage: not enabled
 
 ## 2. Completed Capabilities
@@ -326,14 +327,55 @@ Conclusion:
 - `noindex, nofollow` should remain enabled.
 - Login, database, payment, public launch, and Gemini remain out of scope for now.
 
-## 11. Important Product Findings
+## 11. P5-4 Product Copy Polish
+
+Commit: `62f3bea` Polish AI visibility product copy
+
+Goal:
+
+- Help first-time visitors understand the core value of LLM Lens more quickly.
+
+Core product message:
+
+- Whether AI search-style answers mention your brand.
+- Whether AI search-style answers cite your official website.
+- Whether AI search-style answers recommend you in relevant buying contexts.
+- Mention does not equal Citation.
+- Citation Rate is based on whether returned source URLs matched the submitted domain.
+- Recommendation Signal is a contextual signal, not a guaranteed ranking.
+
+### P5-4 Online Validation
+
+Production validation confirmed:
+
+- Vercel deployed commit `62f3bea`.
+- Production deployment status: `READY`.
+- Hero copy correctly explains brand mentions, official website citations, and buying-context recommendations.
+- Form intro includes `sampled AI visibility audit`.
+- Perplexity intro includes `limited live Perplexity audit`, `sampled prompts`, and `source URL checks`.
+- Product overview heading is: `Separate brand mentions from official website citations.`
+- FAQ includes: `Does a brand mention mean my website was cited?`
+- Disclaimer now states:
+  - Scores are estimates.
+  - Scores are not rankings.
+  - Scores are not traffic forecasts.
+  - Scores are not proof that an AI system will cite or recommend a brand.
+- No `recommendation position` copy remains.
+
+Conclusion:
+
+- P5-1, P5-2, P5-3, and P5-4 passed validation.
+- `noindex, nofollow` should remain enabled.
+- Login, database, payment, public launch, and Gemini remain out of scope for now.
+
+## 12. Important Product Findings
 
 - AI answer mentions your brand does not mean it cites your official website.
 - Mention, Recommendation, and Citation are separate visibility signals.
 - Citation Rate 0 is not necessarily a bug. It may mean the AI answer used third-party sources instead of the official website.
 - This separation can become one of LLM Lens's core value points: showing not only whether a brand appears, but whether the official site is used as a source.
 
-## 12. Known Issues
+## 13. Known Issues
 
 - A single prompt can produce volatile results.
 - Recommendation Signal is now more conservative, but should continue to be reviewed against more real samples.
@@ -342,19 +384,21 @@ Conclusion:
 - Login, database, saved reports, and paywall are not implemented.
 - `noindex, nofollow` remains enabled, so the site is not intended for public search indexing yet.
 
-## 13. Next Priorities
+## 14. Next Priorities
 
-### P5-4: Landing page / product copy polish
+### P5-5: Cost control / usage guardrails
 
-- Clarify the core value: AI mention vs official website citation.
-- Keep the copy conservative and diagnostic-focused.
-- Keep `noindex, nofollow` until the user explicitly approves indexing.
-
-### P5-4 Alternative: Cost control / usage guardrails
-
-- Add clearer Real API credit usage messaging.
+- Add clearer Real API credit usage messaging where users choose Perplexity.
 - Keep Perplexity prompt limits conservative.
+- Consider lightweight guardrails before any public launch.
 - Avoid adding login, database, or payment before the product direction is confirmed.
+
+### P5-5 Alternative: Final pre-public checklist
+
+- Confirm whether `noindex, nofollow` should remain enabled.
+- Re-check API key safety and frontend bundle exposure.
+- Re-check rate limits, cost controls, and error messages.
+- Decide whether the product is ready for a small public beta.
 
 ### Later decision points
 
@@ -363,7 +407,7 @@ Conclusion:
 - Decide whether to build a landing page or public beta.
 - Decide whether to add saved reports, login, or related SaaS features.
 
-## 14. Not Now
+## 15. Not Now
 
 - Do not remove `noindex, nofollow`.
 - Do not add login.
@@ -374,7 +418,7 @@ Conclusion:
 - Do not make a major UI redesign.
 - Do not open the tool for large-scale external usage yet.
 
-## 15. Run Checks
+## 16. Run Checks
 
 Run before committing future changes:
 
