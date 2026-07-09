@@ -14,6 +14,8 @@
 - P1 prompt generation: complete
 - P2 result explanation: complete
 - P3 citation/domain diagnostics: complete
+- P5-1 three-prompt mini audit guidance: complete
+- P5-2 recommendation signal tightening: complete
 - Public indexing and large-scale external usage: not enabled
 
 ## 2. Completed Capabilities
@@ -31,6 +33,8 @@
 - Sources display hostnames and remain clickable
 - Citation diagnostics: Expected domain, Source domains, Matched source domains
 - Matched official domains are marked in the Sources column
+- Default prompt count is 3 for a recommended mini audit
+- Perplexity Recommendation Signal now separates ordinary mention from stronger recommendation context
 
 ## 3. Key Fix History
 
@@ -42,6 +46,9 @@
 - `51e1875` Improve prompt generation quality
 - `c39d4c9` Improve result explanation copy
 - `e9116e7` Improve citation domain diagnostics
+- `43c1847` Recommend three-prompt mini audit
+- `a46066b` Place prompt count guidance near input
+- `7cfaa4c` Tighten recommendation signal detection
 
 ## 4. Real Test Results
 
@@ -177,41 +184,125 @@ Notion / productivity software:
 - Citation Rate: 0%
 - This shows that no returned source URL matched the official website domain.
 
-## 8. Important Product Findings
+## 8. P5-1 Three-Prompt Mini Audit
+
+Initial commit: `43c1847` Recommend three-prompt mini audit
+
+Follow-up fix: `a46066b` Place prompt count guidance near input
+
+Changes completed:
+
+- Default `numberOfPrompts` changed from 10 to 3.
+- Mock mode still allows 1-20 prompts.
+- Perplexity mode still allows 1-5 prompts.
+- Switching to Perplexity still clamps prompt count to 5 when needed.
+- The UI explains:
+  - `1 prompt = quick snapshot.`
+  - `3 prompts = recommended mini audit.`
+  - `More prompts may use more API credits.`
+- Perplexity mode shows `Recommended: 3 prompts`.
+
+Online validation:
+
+- Production deployment was confirmed on commit `a46066b`.
+- The production bundle contained `numberOfPrompts:3`.
+- The prompt guidance appeared near the Number of prompts input.
+
+## 9. P5-2 Recommendation Signal Tightening
+
+Commit: `7cfaa4c` Tighten recommendation signal detection
+
+Changes completed:
+
+- `recommendationSignal` no longer uses broad full-answer keyword matching.
+- The brand must be mentioned before Recommendation Signal can be true.
+- Recommendation matching now checks brand-near context and the sentence containing the brand.
+- Weak terms such as `option`, `alternative`, `useful`, and `consider` no longer trigger alone.
+- Added a contrast guard to reduce false positives such as: `Notion was mentioned, but the top tools were ClickUp and Asana.`
+
+No changes were made to:
+
+- Scoring weights
+- Prompt generation
+- Citation/domain matching
+- Perplexity API request flow
+- SEO, `noindex`, robots, sitemap
+- API keys or environment variables
+
+### P5-2 Online Validation
+
+Canva / design tool:
+
+- Score: 52
+- Mention Rate: 100%
+- Citation Rate: 33%
+- Recommendation Rate: 33%
+- Matched domain: `canva.com`
+- Judgment: ordinary mention is no longer always counted as recommendation.
+
+Shopify / ecommerce platform:
+
+- Score: 60
+- Mention Rate: 100%
+- Citation Rate: 0%
+- Recommendation Rate: 100%
+- Judgment: Shopify is still strongly recommended in ecommerce platform context, which is reasonable.
+
+Beehiiv / newsletter platform:
+
+- Score: 32
+- Mention Rate: 67%
+- Citation Rate: 0%
+- Recommendation Rate: 33%
+- Judgment: the signal is more conservative and reasonable.
+
+Notion / productivity software:
+
+- Score: 32
+- Mention Rate: 67%
+- Citation Rate: 0%
+- Recommendation Rate: 33%
+- Judgment: ordinary mention and recommendation are now separated more clearly.
+
+Conclusion:
+
+- P5-1 and P5-2 passed validation.
+- Recommendation Signal should not be tightened further until more real samples are collected.
+- `noindex, nofollow` should remain enabled.
+
+## 10. Important Product Findings
 
 - AI answer mentions your brand does not mean it cites your official website.
 - Mention, Recommendation, and Citation are separate visibility signals.
 - Citation Rate 0 is not necessarily a bug. It may mean the AI answer used third-party sources instead of the official website.
 - This separation can become one of LLM Lens's core value points: showing not only whether a brand appears, but whether the official site is used as a source.
 
-## 9. Known Issues
+## 11. Known Issues
 
 - A single prompt can produce volatile results.
-- Recommendation Signal may be too broad.
+- Recommendation Signal is now more conservative, but should continue to be reviewed against more real samples.
 - Citation detection currently uses lightweight hostname matching without a public suffix library.
 - The result table is still wide, but acceptable for the current diagnostic version.
 - Login, database, saved reports, and paywall are not implemented.
 - `noindex, nofollow` remains enabled, so the site is not intended for public search indexing yet.
 
-## 10. Next Priorities
+## 12. Next Priorities
 
-### P4: Small-sample validation across 10-20 brands
+### P5-3: Result export
 
-- Large brands
-- Small brands
-- User-owned projects
-- Different industries
-- Record differences between 1-prompt and 3-prompt runs
-- Observe whether Mention, Citation, and Recommendation signals look reasonable
+- Add Copy summary.
+- Add Download Markdown.
+- Add Download JSON.
+- Do not add a database yet.
 
-### P5: Decision point
+### Later decision points
 
 - Decide whether to continue product optimization.
 - Decide whether the product is ready to remove `noindex, nofollow`.
 - Decide whether to build a landing page or public beta.
 - Decide whether to add saved reports, export, login, or related SaaS features.
 
-## 11. Not Now
+## 13. Not Now
 
 - Do not remove `noindex, nofollow`.
 - Do not add login.
@@ -222,7 +313,7 @@ Notion / productivity software:
 - Do not make a major UI redesign.
 - Do not open the tool for large-scale external usage yet.
 
-## 12. Run Checks
+## 14. Run Checks
 
 Run before committing future changes:
 
