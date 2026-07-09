@@ -264,9 +264,8 @@ function App() {
           <p className="eyebrow">AI visibility audit</p>
           <h1>AI Search Visibility Checker</h1>
           <p className="hero-lede">
-            Estimate whether your brand is mentioned, cited,
-            <br className="desktop-break" /> or recommended in AI search-style
-            answers.
+            Estimate whether AI search-style answers mention your brand, cite
+            your official website, or recommend you in relevant buying contexts.
           </p>
           <div className="hero-actions">
             <a href="#audit-form" className="primary-link">
@@ -288,8 +287,8 @@ function App() {
             <h2>{formTitle}</h2>
             <p className="muted">
               {isPerplexityMode
-                ? 'Enter your brand, website, and niche to generate live Perplexity visibility signals.'
-                : 'Enter your brand, website, and niche to generate deterministic mock visibility signals.'}
+                ? 'Run a limited live Perplexity audit using sampled prompts and source URL checks.'
+                : 'Enter your brand, website, and niche to run a sampled AI visibility audit.'}
             </p>
           </div>
 
@@ -538,8 +537,9 @@ function App() {
                     <div>
                       <dt>Recommendation Rate</dt>
                       <dd>
-                        Whether the answer context appears to recommend or
-                        positively mention your brand.
+                        Recommendation Signal checks whether the brand appears
+                        near stronger recommendation language. It is a
+                        contextual signal, not a guaranteed ranking.
                       </dd>
                     </div>
                   </dl>
@@ -739,13 +739,14 @@ function App() {
       <section className="section intro-section">
         <div>
           <p className="eyebrow">Product overview</p>
-          <h2>Estimate how visible your site looks in AI search answers.</h2>
+          <h2>Separate brand mentions from official website citations.</h2>
         </div>
         <p>
           LLM Lens helps small teams review prompt-level visibility signals:
-          brand mentions, website citations, recommendation position, and
-          competitor appearances. Mock mode uses deterministic sample data, and
-          Perplexity mode uses live API responses for a limited real audit.
+          brand mentions, official website citations, recommendation context,
+          competitor appearances, and source domains. Mock mode uses
+          deterministic sample data, while Perplexity mode uses live API
+          responses for a limited diagnostic audit.
         </p>
       </section>
 
@@ -770,6 +771,15 @@ function App() {
             </p>
           </article>
           <article>
+            <h3>Does a brand mention mean my website was cited?</h3>
+            <p>
+              No. An AI answer can mention a brand while citing third-party
+              sources. LLM Lens separates Mention Rate from Citation Rate so you
+              can see whether returned source URLs matched your submitted
+              domain.
+            </p>
+          </article>
+          <article>
             <h3>Can this guarantee recommendations?</h3>
             <p>
               No. LLM Lens provides visibility estimates and content ideas. It
@@ -791,8 +801,9 @@ function App() {
         <p>
           Mock results do not represent real AI search engine output. Perplexity
           results are based on live API responses, but AI answers may vary.
-          Scores are estimates intended for product evaluation and planning,
-          not proof of actual AI visibility.
+          Scores are estimates for diagnostic review. They are not rankings,
+          traffic forecasts, or proof that an AI system will cite or recommend a
+          brand.
         </p>
       </section>
     </main>
