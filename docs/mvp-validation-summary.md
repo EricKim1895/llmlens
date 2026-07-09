@@ -16,6 +16,7 @@
 - P3 citation/domain diagnostics: complete
 - P5-1 three-prompt mini audit guidance: complete
 - P5-2 recommendation signal tightening: complete
+- P5-3 audit result export: complete
 - Public indexing and large-scale external usage: not enabled
 
 ## 2. Completed Capabilities
@@ -270,14 +271,69 @@ Conclusion:
 - Recommendation Signal should not be tightened further until more real samples are collected.
 - `noindex, nofollow` should remain enabled.
 
-## 10. Important Product Findings
+## 10. P5-3 Audit Result Export
+
+Commit: `104ab3d` Add audit result export actions
+
+Capabilities added:
+
+- Copy summary
+- Download Markdown
+- Download JSON
+
+New file:
+
+- `src/lib/exportResult.ts`
+
+Implementation notes:
+
+- Export is a frontend-only feature.
+- No database is required.
+- No login is required.
+- Results are not saved to a server.
+- No share link is generated.
+
+### P5-3 Online Validation
+
+Production validation confirmed:
+
+- The production bundle contains the P5-3 export implementation.
+- Export buttons are hidden before an audit result exists.
+- Export buttons appear after an audit completes:
+  - Copy summary
+  - Download Markdown
+  - Download JSON
+- Copy summary works and displays `Summary copied.`
+- Markdown download works with filename `llm-lens-canva-audit.md`.
+- JSON download works with filename `llm-lens-canva-audit.json`.
+- JSON export includes:
+  - `exportedAt`
+  - `exportVersion: "1"`
+  - `result`
+- Markdown export includes:
+  - Brand
+  - Website
+  - Score
+  - Mention Rate
+  - Citation Rate
+  - Recommendation Rate
+  - Prompt-Level Results
+  - Sources
+
+Conclusion:
+
+- P5-1, P5-2, and P5-3 passed validation.
+- `noindex, nofollow` should remain enabled.
+- Login, database, payment, public launch, and Gemini remain out of scope for now.
+
+## 11. Important Product Findings
 
 - AI answer mentions your brand does not mean it cites your official website.
 - Mention, Recommendation, and Citation are separate visibility signals.
 - Citation Rate 0 is not necessarily a bug. It may mean the AI answer used third-party sources instead of the official website.
 - This separation can become one of LLM Lens's core value points: showing not only whether a brand appears, but whether the official site is used as a source.
 
-## 11. Known Issues
+## 12. Known Issues
 
 - A single prompt can produce volatile results.
 - Recommendation Signal is now more conservative, but should continue to be reviewed against more real samples.
@@ -286,23 +342,28 @@ Conclusion:
 - Login, database, saved reports, and paywall are not implemented.
 - `noindex, nofollow` remains enabled, so the site is not intended for public search indexing yet.
 
-## 12. Next Priorities
+## 13. Next Priorities
 
-### P5-3: Result export
+### P5-4: Landing page / product copy polish
 
-- Add Copy summary.
-- Add Download Markdown.
-- Add Download JSON.
-- Do not add a database yet.
+- Clarify the core value: AI mention vs official website citation.
+- Keep the copy conservative and diagnostic-focused.
+- Keep `noindex, nofollow` until the user explicitly approves indexing.
+
+### P5-4 Alternative: Cost control / usage guardrails
+
+- Add clearer Real API credit usage messaging.
+- Keep Perplexity prompt limits conservative.
+- Avoid adding login, database, or payment before the product direction is confirmed.
 
 ### Later decision points
 
 - Decide whether to continue product optimization.
 - Decide whether the product is ready to remove `noindex, nofollow`.
 - Decide whether to build a landing page or public beta.
-- Decide whether to add saved reports, export, login, or related SaaS features.
+- Decide whether to add saved reports, login, or related SaaS features.
 
-## 13. Not Now
+## 14. Not Now
 
 - Do not remove `noindex, nofollow`.
 - Do not add login.
@@ -313,7 +374,7 @@ Conclusion:
 - Do not make a major UI redesign.
 - Do not open the tool for large-scale external usage yet.
 
-## 14. Run Checks
+## 15. Run Checks
 
 Run before committing future changes:
 
