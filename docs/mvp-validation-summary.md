@@ -18,6 +18,7 @@
 - P5-2 recommendation signal tightening: complete
 - P5-3 audit result export: complete
 - P5-4 product copy polish: complete
+- P5-5 cost control / usage guardrails: complete
 - Public indexing and large-scale external usage: not enabled
 
 ## 2. Completed Capabilities
@@ -51,6 +52,7 @@
 - `43c1847` Recommend three-prompt mini audit
 - `a46066b` Place prompt count guidance near input
 - `7cfaa4c` Tighten recommendation signal detection
+- `cd03764` Add Perplexity usage guardrails
 
 ## 4. Real Test Results
 
@@ -368,14 +370,70 @@ Conclusion:
 - `noindex, nofollow` should remain enabled.
 - Login, database, payment, public launch, and Gemini remain out of scope for now.
 
-## 12. Important Product Findings
+## 12. P5-5 Cost Control / Usage Guardrails
+
+Commit: `cd03764` Add Perplexity usage guardrails
+
+Modified files:
+
+- `.env.example`
+- `api/analyze-perplexity.ts`
+- `src/App.tsx`
+- `src/lib/types.ts`
+
+Implementation:
+
+- Perplexity mode supports an optional access code.
+- The access code is read from the Vercel environment variable `LLM_LENS_ACCESS_CODE`.
+- The access code is limited to the request layer and does not enter `AuditResult`.
+- The access code is not included in Markdown or JSON exports.
+- Mock mode does not display, require, or submit an access code.
+
+Backend limits:
+
+- Maximum prompts per Perplexity request: 5
+- Maximum prompt text length: 500 characters
+- Maximum `brandName` length: 80 characters
+- Maximum `websiteUrl` length: 300 characters
+- Maximum `industry` length: 120 characters
+- Maximum `targetCountry` length: 80 characters
+- Maximum `targetLanguage` length: 80 characters
+- Maximum competitors: 10
+- Maximum competitor name length: 80 characters
+- Maximum request body size: approximately 20 KB
+
+Error handling:
+
+- Missing or invalid access code: `403 Access code required.`
+- Invalid request structure or field limits: `400 Invalid audit request.`
+- Perplexity error logging truncates the response body to 800 characters.
+- API keys, access codes, authorization headers, and complete request bodies are not logged.
+
+Online validation:
+
+- The Production environment variable is configured.
+- Redeploy completed.
+- Mock mode remains available and does not show the Access code field.
+- Perplexity mode shows the Access code field and API credit warning.
+- A missing access code returns 403.
+- An incorrect access code returns 403.
+- A non-Perplexity request returns 400.
+- Overlong brand and prompt fields return 400.
+- A competitor list over the configured limit returns 400.
+
+Conclusion:
+
+- P5-5 usage guardrails are active in Production.
+- `noindex, nofollow` should remain enabled while the product is limited to internal validation.
+
+## 13. Important Product Findings
 
 - AI answer mentions your brand does not mean it cites your official website.
 - Mention, Recommendation, and Citation are separate visibility signals.
 - Citation Rate 0 is not necessarily a bug. It may mean the AI answer used third-party sources instead of the official website.
 - This separation can become one of LLM Lens's core value points: showing not only whether a brand appears, but whether the official site is used as a source.
 
-## 13. Known Issues
+## 14. Known Issues
 
 - A single prompt can produce volatile results.
 - Recommendation Signal is now more conservative, but should continue to be reviewed against more real samples.
@@ -384,21 +442,15 @@ Conclusion:
 - Login, database, saved reports, and paywall are not implemented.
 - `noindex, nofollow` remains enabled, so the site is not intended for public search indexing yet.
 
-## 14. Next Priorities
+## 15. Next Priorities
 
-### P5-5: Cost control / usage guardrails
-
-- Add clearer Real API credit usage messaging where users choose Perplexity.
-- Keep Perplexity prompt limits conservative.
-- Consider lightweight guardrails before any public launch.
-- Avoid adding login, database, or payment before the product direction is confirmed.
-
-### P5-5 Alternative: Final pre-public checklist
+### Final pre-public checklist
 
 - Confirm whether `noindex, nofollow` should remain enabled.
 - Re-check API key safety and frontend bundle exposure.
 - Re-check rate limits, cost controls, and error messages.
 - Decide whether the product is ready for a small public beta.
+- Track the remaining release decisions in `docs/final-pre-public-checklist.md`.
 
 ### Later decision points
 
@@ -407,7 +459,7 @@ Conclusion:
 - Decide whether to build a landing page or public beta.
 - Decide whether to add saved reports, login, or related SaaS features.
 
-## 15. Not Now
+## 16. Not Now
 
 - Do not remove `noindex, nofollow`.
 - Do not add login.
@@ -418,7 +470,7 @@ Conclusion:
 - Do not make a major UI redesign.
 - Do not open the tool for large-scale external usage yet.
 
-## 16. Run Checks
+## 17. Run Checks
 
 Run before committing future changes:
 
