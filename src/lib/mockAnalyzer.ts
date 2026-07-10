@@ -1,4 +1,5 @@
 import type { AuditFormInput, GeneratedPrompt, PromptResult } from './types'
+import { getMatchedSourceDomains, getSourceDomains } from './domain'
 
 const hashString = (value: string): number => {
   let hash = 2166136261
@@ -18,6 +19,21 @@ const domainFromUrl = (url: string): string => {
     return new URL(url).hostname.replace(/^www\./, '')
   } catch {
     return url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0]
+  }
+}
+
+const getWebsiteHomepageUrl = (
+  websiteUrl: string,
+  fallbackDomain: string,
+): string => {
+  try {
+    const normalizedUrl = websiteUrl.includes('://')
+      ? new URL(websiteUrl)
+      : new URL(`https://${websiteUrl}`)
+
+    return `${normalizedUrl.origin}/`
+  } catch {
+    return fallbackDomain ? `https://${fallbackDomain}/` : ''
   }
 }
 
@@ -78,7 +94,7 @@ const summarizeAnswer = (
   competitorsMentioned: string[],
 ): string => {
   if (mentionedBrand && citedDomain) {
-    return `The mock answer mentions ${input.brandName} and includes the website domain as a possible visibility signal.`
+    return `The mock answer mentions ${input.brandName} and includes a simulated official-domain citation signal.`
   }
 
   if (mentionedBrand) {
@@ -97,6 +113,7 @@ export const runMockAnalyzer = (
   prompts: GeneratedPrompt[],
 ): PromptResult[] => {
   const domain = domainFromUrl(input.websiteUrl)
+  const homepageUrl = getWebsiteHomepageUrl(input.websiteUrl, domain)
 
   return prompts.map((prompt) => {
     const baseSeed = `${input.brandName}:${domain}:${input.industry}:${prompt.text}`
@@ -112,6 +129,12 @@ export const runMockAnalyzer = (
       ? 1 + Math.floor(seededRatio(`${baseSeed}:position`) * 3)
       : null
     const competitorsMentioned = selectCompetitors(input, prompt)
+    const sourceUrls = citedDomain && homepageUrl ? [homepageUrl] : []
+    const sourceDomains = getSourceDomains(sourceUrls)
+    const matchedSourceDomains = getMatchedSourceDomains(
+      sourceUrls,
+      input.websiteUrl,
+    )
 
     return {
       promptId: prompt.id,
@@ -127,10 +150,10 @@ export const runMockAnalyzer = (
         citedDomain,
         competitorsMentioned,
       ),
-      sourceUrls: [],
+      sourceUrls,
       expectedDomain: domain,
-      sourceDomains: [],
-      matchedSourceDomains: [],
+      sourceDomains,
+      matchedSourceDomains,
     }
   })
 }
