@@ -33,7 +33,20 @@ type PerplexityApiResponse = {
 }
 
 const MAX_PERPLEXITY_PROMPTS = 5
+const MAX_REQUEST_BODY_CHARS = 20_000
+const MAX_PROMPT_TEXT_CHARS = 500
+const MAX_COMPETITORS = 10
+const MAX_LOG_BODY_CHARS = 800
 const PERPLEXITY_ENDPOINT = 'https://api.perplexity.ai/v1/sonar'
+
+const FIELD_LIMITS = {
+  brandName: { min: 1, max: 80 },
+  websiteUrl: { min: 1, max: 300 },
+  industry: { min: 1, max: 120 },
+  targetCountry: { min: 0, max: 80 },
+  targetLanguage: { min: 0, max: 80 },
+  competitor: { min: 1, max: 80 },
+} as const
 
 class PerplexityRequestError extends Error {
   statusCode: number
@@ -333,13 +346,77 @@ const getRequestBody = (body: unknown): AnalyzePerplexityRequest | null => {
   return body as AnalyzePerplexityRequest
 }
 
+const isStringWithin = (
+  value: unknown,
+  { min, max }: { min: number; max: number },
+): value is string =>
+  typeof value === 'string' &&
+  value.trim().length >= min &&
+  value.trim().length <= max
+
+const isReasonableRequestSize = (body: unknown): boolean => {
+  try {
+    return JSON.stringify(body).length <= MAX_REQUEST_BODY_CHARS
+  } catch {
+    return false
+  }
+}
+
+const isValidCompetitors = (competitors: unknown): competitors is string[] =>
+  Array.isArray(competitors) &&
+  competitors.length <= MAX_COMPETITORS &&
+  competitors.every((competitor) =>
+    isStringWithin(competitor, FIELD_LIMITS.competitor),
+  )
+
+const isValidPrompts = (prompts: unknown): prompts is GeneratedPrompt[] =>
+  Array.isArray(prompts) &&
+  prompts.length >= 1 &&
+  prompts.length <= MAX_PERPLEXITY_PROMPTS &&
+  prompts.every(
+    (prompt) =>
+      Boolean(prompt) &&
+      typeof prompt === 'object' &&
+      isStringWithin(
+        (prompt as Partial<GeneratedPrompt>).text,
+        { min: 1, max: MAX_PROMPT_TEXT_CHARS },
+      ),
+  )
+
 const isValidRequest = (body: AnalyzePerplexityRequest | null): boolean =>
   Boolean(
-    body?.input?.brandName &&
-      body.input.websiteUrl &&
-      body.input.industry &&
-      Array.isArray(body.prompts),
+    body &&
+      isReasonableRequestSize(body) &&
+      body.input?.searchEngine === 'perplexity' &&
+      isStringWithin(body.input.brandName, FIELD_LIMITS.brandName) &&
+      isStringWithin(body.input.websiteUrl, FIELD_LIMITS.websiteUrl) &&
+      isStringWithin(body.input.industry, FIELD_LIMITS.industry) &&
+      isStringWithin(body.input.targetCountry, FIELD_LIMITS.targetCountry) &&
+      isStringWithin(body.input.targetLanguage, FIELD_LIMITS.targetLanguage) &&
+      Number.isFinite(body.input.numberOfPrompts) &&
+      body.input.numberOfPrompts >= 1 &&
+      body.input.numberOfPrompts <= MAX_PERPLEXITY_PROMPTS &&
+      isValidCompetitors(body.input.competitors) &&
+      isValidPrompts(body.prompts),
   )
+
+const requiresAccessCode = () =>
+  Boolean(process.env.LLM_LENS_ACCESS_CODE?.trim())
+
+const hasValidAccessCode = (body: AnalyzePerplexityRequest) => {
+  const expectedAccessCode = process.env.LLM_LENS_ACCESS_CODE?.trim()
+
+  if (!expectedAccessCode) {
+    return true
+  }
+
+  return body.accessCode?.trim() === expectedAccessCode
+}
+
+const truncateForLog = (value: string): string =>
+  value.length > MAX_LOG_BODY_CHARS
+    ? `${value.slice(0, MAX_LOG_BODY_CHARS)}... [truncated]`
+    : value
 
 const callPerplexity = async ({
   apiKey,
@@ -375,7 +452,7 @@ const callPerplexity = async ({
 
     console.error('Perplexity API request failed', {
       status: response.status,
-      body: errorText,
+      body: truncateForLog(errorText),
     })
 
     throw new PerplexityRequestError(response.status)
@@ -393,15 +470,6 @@ export default async function handler(
     return
   }
 
-  const apiKey = process.env.PERPLEXITY_API_KEY
-
-  if (!apiKey) {
-    response
-      .status(500)
-      .json({ error: 'Perplexity API key is not configured.' })
-    return
-  }
-
   const body = getRequestBody(request.body)
 
   if (!isValidRequest(body)) {
@@ -410,6 +478,20 @@ export default async function handler(
   }
 
   const auditRequest = body as AnalyzePerplexityRequest
+
+  if (requiresAccessCode() && !hasValidAccessCode(auditRequest)) {
+    response.status(403).json({ error: 'Access code required.' })
+    return
+  }
+
+  const apiKey = process.env.PERPLEXITY_API_KEY
+
+  if (!apiKey) {
+    response
+      .status(500)
+      .json({ error: 'Perplexity API key is not configured.' })
+    return
+  }
 
   try {
     const prompts = auditRequest.prompts.slice(0, MAX_PERPLEXITY_PROMPTS)

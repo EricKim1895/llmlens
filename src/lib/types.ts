@@ -64,6 +64,7 @@ export interface AuditResult {
 export interface AnalyzePerplexityRequest {
   input: AuditFormInput
   prompts: GeneratedPrompt[]
+  accessCode?: string
 }
 
 export interface AnalyzePerplexityResponse {

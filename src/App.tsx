@@ -20,6 +20,7 @@ const DEFAULT_FORM = {
   competitors: '',
   numberOfPrompts: 3,
   searchEngine: 'mock' as SearchEngine,
+  accessCode: '',
 }
 
 type FormState = typeof DEFAULT_FORM
@@ -197,7 +198,11 @@ function App() {
     try {
       const promptResults =
         searchEngine === 'perplexity'
-          ? await runPerplexityAnalyzer({ input, prompts: analyzedPrompts })
+          ? await runPerplexityAnalyzer({
+              input,
+              prompts: analyzedPrompts,
+              accessCode: form.accessCode.trim() || undefined,
+            })
           : runMockAnalyzer(input, analyzedPrompts)
 
       setResult(buildAuditResult(input, analyzedPrompts, promptResults))
@@ -421,9 +426,27 @@ function App() {
 
           <p className="mode-callout">
             {isPerplexityMode
-              ? 'Real API mode · Uses Perplexity Sonar · Limited to 5 prompts · Consumes API credits'
+              ? 'Real API mode uses live Perplexity responses and may consume API credits. Keep tests small.'
               : 'Mock mode uses deterministic sample results and does not call external APIs.'}
           </p>
+
+          {isPerplexityMode ? (
+            <label>
+              Access code
+              <input
+                autoComplete="off"
+                value={form.accessCode}
+                onChange={(event) =>
+                  updateField('accessCode', event.target.value)
+                }
+                placeholder="Access code"
+                type="password"
+              />
+              <span className="help-text">
+                Required for live Perplexity audits when enabled.
+              </span>
+            </label>
+          ) : null}
 
           {error ? <p className="form-error">{error}</p> : null}
 
