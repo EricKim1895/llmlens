@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Privacy information for LLM Lens Mock and limited Perplexity audit modes."
+    />
+    <title>LLM Lens Privacy Notice</title>
+    <style>
+      :root {
+        color: #10251d;
+        background: #f6f8f6;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; }
+
+      main {
+        width: min(760px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 56px 0 72px;
+      }
+
+      a { color: #075c45; }
+      .eyebrow {
+        color: #087354;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        margin: 0 0 10px;
+        text-transform: uppercase;
+      }
+
+      h1, h2 { color: #0c2018; }
+      h1 { font-size: clamp(34px, 6vw, 52px); margin: 0 0 18px; }
+      h2 { font-size: 22px; margin: 34px 0 10px; }
+      p, li { color: #3c554c; line-height: 1.65; }
+
+      .notice {
+        background: #ffffff;
+        border: 1px solid #dbe5df;
+        border-radius: 8px;
+        box-shadow: 0 10px 24px rgba(17, 48, 36, 0.06);
+        padding: 28px;
+      }
+
+      .back-link { display: inline-block; margin-top: 28px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">LLM Lens</p>
+      <h1>Privacy Notice</h1>
+      <div class="notice">
+        <h2>Mock mode</h2>
+        <p>
+          Mock audits run with deterministic sample data. Mock inputs are not
+          sent to Perplexity, and Mock mode does not consume Perplexity API
+          credits.
+        </p>
+
+        <h2>Perplexity mode</h2>
+        <p>
+          For a live Perplexity audit, your brand, website, industry,
+          competitors, and generated prompts may be sent through the LLM Lens
+          serverless endpoint to Perplexity to produce the audit. Do not submit
+          confidential, personal, regulated, or other sensitive information.
+        </p>
+
+        <h2>Data storage</h2>
+        <p>
+          LLM Lens does not currently provide user accounts. Audit inputs and
+          results are not intentionally stored in an LLM Lens application
+          database. You can download results locally through Markdown or JSON
+          export. Vercel and Perplexity may process technical or request data
+          according to their own services and policies.
+        </p>
+
+        <h2>Access code</h2>
+        <p>
+          The beta access code is used only to limit access to live Perplexity
+          audits. It is not an account password and should not be shared
+          publicly.
+        </p>
+
+        <h2>Diagnostic disclaimer</h2>
+        <p>
+          Results are estimates for diagnostic review. They are not rankings,
+          traffic forecasts, or guarantees that an AI system will cite or
+          recommend a brand.
+        </p>
+      </div>
+      <a class="back-link" href="/">Back to LLM Lens</a>
+    </main>
+  </body>
+</html>

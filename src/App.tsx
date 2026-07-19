@@ -415,7 +415,7 @@ function App() {
                   }
                   type="radio"
                 />
-                Perplexity <span>Sonar</span>
+                Perplexity <span>Sonar | Access-code beta</span>
               </label>
               <label className="radio-option disabled">
                 <input disabled name="searchEngine" type="radio" />
@@ -426,7 +426,7 @@ function App() {
 
           <p className="mode-callout">
             {isPerplexityMode
-              ? 'Real API mode uses live Perplexity responses and may consume API credits. Keep tests small.'
+              ? 'Real API mode uses live Perplexity responses and may consume API credits. Keep tests small. Live Perplexity audits are currently available to invited testers.'
               : 'Mock mode uses deterministic sample results and does not call external APIs.'}
           </p>
 
@@ -443,7 +443,7 @@ function App() {
                 type="password"
               />
               <span className="help-text">
-                Required for live Perplexity audits when enabled.
+                Required for live Perplexity audits when enabled. This access code is for the limited beta and is not an account password.
               </span>
             </label>
           ) : null}
@@ -827,6 +827,9 @@ function App() {
           Scores are estimates for diagnostic review. They are not rankings,
           traffic forecasts, or proof that an AI system will cite or recommend a
           brand.
+        </p>
+        <p className="privacy-link">
+          <a href="/privacy.html">Privacy</a>
         </p>
       </section>
     </main>

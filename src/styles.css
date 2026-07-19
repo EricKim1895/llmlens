@@ -674,6 +674,10 @@ td {
   padding: 24px;
 }
 
+.privacy-link {
+  margin-bottom: 0;
+}
+
 @media (max-width: 940px) {
   .app-shell {
     padding: 0 20px 20px;
